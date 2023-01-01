@@ -1,0 +1,60 @@
+﻿<Window x:Class="SightHighlighter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SightHighlighter"
+        mc:Ignorable="d"
+        Title="SightHighlighter" Height="450" Width="800">
+    <Window.Resources>
+        <local:NonlinearConverter x:Key="nonlinearConverter"/>
+    </Window.Resources>
+    <Grid>
+        <TabControl Grid.ColumnSpan="1">
+            <TabItem Header="Detection">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <GroupBox Header="Image to find">
+                        <StackPanel>
+                            <Button x:Name="loadFileButton" Content="Load file" HorizontalAlignment="Left" VerticalAlignment="Top" Click="fileLoadButton_Click"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Apply similarity"></Button>
+                                <local:CustomTextBox x:Name="similarityThresholdTextBox" Width="40" Margin="3"
+                                                     Text="{Binding similarityThreshold, UpdateSourceTrigger=Explicit, StringFormat={}{0:###.000}}">
+                                         <!--Text="{Binding similarityThreshold, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:###.###}}">-->
+                                    <!--format ref: https://stackoverflow.com/questions/18361689/how-to-format-number-of-decimal-places-in-wpf-using-style-template-->
+                                    <!--<TextBox.InputBindings>
+                                        <KeyBinding Command="{Binding ApplySimilarityCommand}" Key="Enter"/>
+                                    </TextBox.InputBindings>-->
+                                </local:CustomTextBox>
+                                <Label Content="%"></Label>
+                                <Slider Width="120" VerticalContentAlignment="Bottom" Maximum="100" Value="{Binding similarityThreshold, Converter={StaticResource nonlinearConverter}}" 
+                                        ValueChanged="SimilarityThreshold_ValueChanged" Minimum="1" SmallChange="0.01"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="hookStateToggleButton" Content="Hook on/off" ButtonBase.Click="hookStateToggleButton_Click"/>
+                                <Label Content="Current hook state: " />
+                                <Label x:Name="hookStateLabel" Content="Unknown" />
+                            </StackPanel>
+                            
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Image list" Grid.Column="1">
+                        <Image x:Name="templateImage1" Width="64" Height="64" VerticalAlignment="Top"/>
+                    </GroupBox>
+                    <Image x:Name="capturedImage1" Grid.Row="1" Grid.ColumnSpan="2"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Advanced"/>
+        </TabControl>
+
+    </Grid>
+</Window>
