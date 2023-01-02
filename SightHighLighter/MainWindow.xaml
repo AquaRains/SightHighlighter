@@ -37,7 +37,7 @@
                                 </local:CustomTextBox>
                                 <Label Content="%"></Label>
                                 <Slider Width="120" VerticalContentAlignment="Bottom" Maximum="100" Value="{Binding similarityThreshold, Converter={StaticResource nonlinearConverter}}" 
-                                        ValueChanged="SimilarityThreshold_ValueChanged" Minimum="1" SmallChange="0.01"/>
+                                        Minimum="1" SmallChange="0.01"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Button x:Name="hookStateToggleButton" Content="Hook on/off" ButtonBase.Click="hookStateToggleButton_Click"/>

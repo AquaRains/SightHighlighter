@@ -85,10 +85,7 @@ namespace SightHighlighter
             dispatcherTimer.Stop();
         }
 
-        private void SimilarityThreshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            
-        }
+
         // Todo: 너무 많이찾으면 찾다가 말기
         // Todo2: threshold 값 변경하는법
         // Todo3: 파일 읽을때까지 비활성화
