@@ -26,7 +26,7 @@
                         <StackPanel>
                             <Button x:Name="loadFileButton" Content="Load file" HorizontalAlignment="Left" VerticalAlignment="Top" Click="fileLoadButton_Click"/>
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="Apply similarity"></Button>
+                                <Button x:Name="ApplySimilarityButton" Content="Apply similarity" Command="{Binding ApplySimilarityCommand}"></Button>
                                 <local:CustomTextBox x:Name="similarityThresholdTextBox" Width="40" Margin="3"
                                                      Text="{Binding similarityThreshold, UpdateSourceTrigger=Explicit, StringFormat={}{0:###.000}}">
                                          <!--Text="{Binding similarityThreshold, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:###.###}}">-->
@@ -36,13 +36,20 @@
                                     </TextBox.InputBindings>-->
                                 </local:CustomTextBox>
                                 <Label Content="%"></Label>
-                                <Slider Width="120" VerticalContentAlignment="Bottom" Maximum="100" Value="{Binding similarityThreshold, Converter={StaticResource nonlinearConverter}}" 
-                                        Minimum="1" SmallChange="0.01"/>
+                                
                             </StackPanel>
+                            <Slider VerticalContentAlignment="Bottom" Maximum="100" Value="{Binding similarityThreshold, Converter={StaticResource nonlinearConverter}}" 
+                                        Minimum="1" SmallChange="0.01"/>
                             <StackPanel Orientation="Horizontal">
                                 <Button x:Name="hookStateToggleButton" Content="Hook on/off" ButtonBase.Click="hookStateToggleButton_Click"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
                                 <Label Content="Current hook state: " />
                                 <Label x:Name="hookStateLabel" Content="Unknown" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="Matched counts: " />
+                                <Label x:Name="matchedCountsLabel" Content="Unknown" />
                             </StackPanel>
                             
                         </StackPanel>

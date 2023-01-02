@@ -2,6 +2,7 @@
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
@@ -33,14 +34,23 @@ namespace SightHighlighter
 
         private void dispatcherTimer_Tick(object? sender, EventArgs e)
         {
-            //if (capturedImage1.Source != null)
-            //{
-            //    capturedImage1.Source.Dispose();
-            //}
+            if (capturedImage1.Source != null)
+            {
+                capturedImage1.Source = null;
+            }
             //Bitmap img = ImageProcessor.CaptureScreen();
             //capturedImage1.Source = ImageProcessor.ImageSourceForBitmap(img);
             ////capturedImage1.UpdateLayout();
-            capturedImage1.Source = ImageProcessor.FindImage();
+            (int matchCount, ImageSource markedImage) = ImageProcessor.FindImage();
+            if (matchCount >= ImageProcessor.matchCountThreshold)
+            {
+                matchedCountsLabel.Content = string.Format("{0} (Too many, please set larger threshold)",matchCount);
+            }
+            else
+            {
+                matchedCountsLabel.Content = string.Format("{0}", matchCount);
+            }
+            capturedImage1.Source = markedImage;
         }
 
         private void fileLoadButton_Click(object sender, RoutedEventArgs e)
@@ -73,22 +83,33 @@ namespace SightHighlighter
 
         private void HookSubscribe()
         {
-            hookState = true;
-            hookStateLabel.Content = "on";
-            dispatcherTimer.Start();
+            if (templateImage1.Source == null)
+            {
+                MessageBox.Show("Image not set");
+            }
+            else
+            {
+                hookState = true;
+                hookStateLabel.Content = "on";
+                dispatcherTimer.Start();
+            }
         }
 
         private void HookUnsubscribe()
         {
             hookState = false;
             hookStateLabel.Content = "off";
+            matchedCountsLabel.Content = "unknown";
             dispatcherTimer.Stop();
         }
 
 
-        // Todo: 너무 많이찾으면 찾다가 말기
-        // Todo2: threshold 값 변경하는법
-        // Todo3: 파일 읽을때까지 비활성화
+
+
+
+        // Todo: 너무 많이찾으면 찾다가 말기 - done 2023.01.03
+        // Todo2: threshold 값 변경하는법 - done 2023.01.03
+        // Todo3: 파일 읽을때까지 비활성화 - done 2023.01.03
         // Todo4: 파일 언로드하면서 hook 비활성화하는 기능
     }
 }

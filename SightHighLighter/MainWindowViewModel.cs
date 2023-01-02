@@ -1,10 +1,5 @@
-﻿using Prism.Commands;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 
 namespace SightHighlighter
 {
@@ -19,6 +14,8 @@ namespace SightHighlighter
             set { _similarityThreshold = value; OnPropertyChanged("similarityThreshold"); }
         }
 
+        public ButtonCommand ApplySimilarityCommand { get; set; }
+
 
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -30,16 +27,24 @@ namespace SightHighlighter
         // role of delegateCommand: separate callback command and real action in MVVM model
         // in this time, command:ApplySimilarityCommand, Action:ApplySimilarity
         // ref: https://chashtag.tistory.com/57
-        public DelegateCommand ApplySimilarityCommand { get; private set; }
+        // public DelegateCommand ApplySimilarityCommand { get; private set; }
 
         public MainWindowViewModel()
         {
-            ApplySimilarityCommand = new DelegateCommand(ApplySimilarity);
+            ApplySimilarityCommand = new ButtonCommand(ApplySimilarity,CanApplySimilarity);
+            // ApplySimilarityCommand = new DelegateCommand(ApplySimilarity);
         }
 
-        private void ApplySimilarity()
+        private void ApplySimilarity(object? obj)
         {
-            // OnPropertyChanged("similarityThreshold");
+            //Debug.WriteLine(_similarityThreshold.ToString());
+            ImageProcessor.threshold = _similarityThreshold/100.0; // use private variable
         }
+
+        private bool CanApplySimilarity(object? obj)
+        {
+            return true;
+        }
+
     }
 }

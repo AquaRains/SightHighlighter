@@ -13,10 +13,18 @@ namespace SightHighlighter
 {
     public static class ImageProcessor
     {
-        private static int primaryScreenLeft = 0;
-        private static int primaryScreenTop = 0;
+        private static readonly int primaryScreenLeft = 0;
+        private static readonly int primaryScreenTop = 0;
         public static Mat imgtemp = new Mat();
-        public static double threshold = 0.99;
+        private static double _threshold = 0.99;
+        public static double threshold
+        {
+            get { return _threshold; }
+            set { _threshold = value; }
+        }
+        public static readonly int matchCountThreshold = 10;
+
+
         private static System.Drawing.Pen redPen = new System.Drawing.Pen(System.Drawing.Brushes.Red, 5);
         public static Bitmap CaptureScreen() // ref: https://stackoverflow.com/questions/4978157/how-to-search-for-an-image-on-screen-in-c
         {
@@ -97,7 +105,7 @@ namespace SightHighlighter
             }
         }
 
-        public static ImageSource FindImage()
+        public static (int,ImageSource) FindImage()
         {
             int matchCount = 0;
 
@@ -132,8 +140,12 @@ namespace SightHighlighter
             {
                 for (int x = 0; x < result.Width; x++)
                 {
+                    if (matchCount >= matchCountThreshold)
+                    {
+                        goto PixelLoopEnd;
+                    }
                     double value = indexer[y, x];
-                    if (value >= threshold)
+                    if (value >= _threshold)
                     {
                         Rectangle rect = new Rectangle(x, y, imgtemp.Width, imgtemp.Height);
                         graphics.DrawRectangle(redPen, rect);
@@ -142,12 +154,13 @@ namespace SightHighlighter
                     }
                 }
             }
+            PixelLoopEnd:
             mat3.Dispose();
             result.Dispose();
 
             graphics.Dispose();
 
-            return ImageSourceForBitmap(img);
+            return (matchCount, ImageSourceForBitmap(img));
         }
     }
 }
