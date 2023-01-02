@@ -1,1 +1,1 @@
-# SightHighLighter
+# SightHighlighter
