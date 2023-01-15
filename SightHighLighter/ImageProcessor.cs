@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -8,6 +7,8 @@ using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using OpenCvSharp;
+using System.Threading.Tasks;
+using OpenCvSharp.Extensions;
 
 namespace SightHighlighter
 {
@@ -15,20 +16,42 @@ namespace SightHighlighter
     {
         private static readonly int primaryScreenLeft = 0;
         private static readonly int primaryScreenTop = 0;
-        public static Mat imgtemp = new Mat();
-        private static double _threshold = 0.99;
-        public static double threshold
-        {
-            get { return _threshold; }
-            set { _threshold = value; }
-        }
+        
+
         public static readonly int matchCountThreshold = 10;
 
+        public static Mat imgtemp = new();
+        public static Mat grayImg = new();
+        public static Mat bgrImg = new();
+        public static Mat blueImg = new();
+        public static Mat greenImg = new();
+        public static Mat redImg = new();
+        public static void SetImageTemplate(string fileName)
+        {
+            imgtemp = new Mat(fileName);
+
+            // images for each color space
+            grayImg = new Mat(imgtemp.Size(), MatType.CV_8UC1);
+            bgrImg = new Mat(imgtemp.Size(), MatType.CV_8UC3);
+
+            Cv2.CvtColor(imgtemp, grayImg, ColorConversionCodes.BGRA2GRAY);
+            Cv2.CvtColor(imgtemp, bgrImg, ColorConversionCodes.BGRA2BGR);
+            blueImg = bgrImg.ExtractChannel(0); // MatType.CV_8UC1
+            greenImg = bgrImg.ExtractChannel(1);
+            redImg = bgrImg.ExtractChannel(2);
+
+            // imagesource for display
+        }
+
+        public static ImageSource Mat2ImageSource(Mat src, ImageSource dst)
+        {
+            return BitmapSourceFromBitmap(BitmapConverter.ToBitmap(src));
+        }
 
         private static System.Drawing.Pen redPen = new System.Drawing.Pen(System.Drawing.Brushes.Red, 5);
         public static Bitmap CaptureScreen() // ref: https://stackoverflow.com/questions/4978157/how-to-search-for-an-image-on-screen-in-c
         {
-            var image = new System.Drawing.Bitmap((int)SystemParameters.PrimaryScreenWidth, (int)SystemParameters.PrimaryScreenHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var image = new Bitmap((int)SystemParameters.PrimaryScreenWidth, (int)SystemParameters.PrimaryScreenHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             using (Graphics graphics = Graphics.FromImage(image))
             {   // http://m.csharpstudy.com/Tip/View?aspx=Tip-screen-copy.aspx&title=C%23%EC%97%90%EC%84%9C%20%EC%8A%A4%ED%81%AC%EB%A6%B0%20%EC%BA%A1%EC%B3%90
                 graphics.CopyFromScreen(primaryScreenLeft, primaryScreenTop, 0, 0, image.Size, CopyPixelOperation.SourceCopy);
@@ -49,7 +72,7 @@ namespace SightHighlighter
             return image;
         }
 
-        public static System.Windows.Media.Imaging.BitmapSource BitmapSourceFromBitmap(Bitmap bitmap)
+        public static BitmapSource BitmapSourceFromBitmap(Bitmap bitmap)
         {
             // Conversion without interop
             // ref: https://stackoverflow.com/questions/26260654/wpf-converting-bitmap-to-imagesource/26261562#26261562
@@ -88,7 +111,7 @@ namespace SightHighlighter
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeleteObject([In] IntPtr hObject);
 
-        public static ImageSource ImageSourceForBitmap(Bitmap bmp)
+        public static ImageSource ImageSourceFromBitmap(Bitmap bmp)
         {
             var handle = bmp.GetHbitmap();
             try
@@ -105,7 +128,7 @@ namespace SightHighlighter
             }
         }
 
-        public static (int,ImageSource) FindImage()
+        public static (int,ImageSource) FindImage(double threshold)
         {
             int matchCount = 0;
 
@@ -136,31 +159,50 @@ namespace SightHighlighter
             // ref: https://github.com/shimat/opencvsharp/wiki/Accessing-Pixel
             var mat3 = new Mat<float>(result);
             var indexer = mat3.GetIndexer();
-            for (int y = 0; y < result.Height; y++)
+            //for (int y = 0; y < result.Height; y++)
+            //{
+            //    for (int x = 0; x < result.Width; x++)
+            //    {
+            //        if (matchCount >= matchCountThreshold)
+            //        {
+            //            goto PixelLoopEnd;
+            //        }
+            //        double value = indexer[y, x];
+            //        if (value >= _threshold)
+            //        {
+            //            Rectangle rect = new Rectangle(x, y, imgtemp.Width, imgtemp.Height);
+            //            graphics.DrawRectangle(redPen, rect);
+            //            matchCount++;
+            //            //boxpoints.Add((x,y));
+            //        }
+            //    }
+            //}
+            Parallel.For (0, result.Height, (Action<int>)(y =>
             {
                 for (int x = 0; x < result.Width; x++)
                 {
                     if (matchCount >= matchCountThreshold)
                     {
-                        goto PixelLoopEnd;
+                        // goto PixelLoopEnd;
+                        continue;
                     }
                     double value = indexer[y, x];
-                    if (value >= _threshold)
+                    if (value >= threshold)
                     {
-                        Rectangle rect = new Rectangle(x, y, imgtemp.Width, imgtemp.Height);
+                        Rectangle rect = new Rectangle(x, y, (int)ImageProcessor.imgtemp.Width, (int)ImageProcessor.imgtemp.Height);
                         graphics.DrawRectangle(redPen, rect);
                         matchCount++;
                         //boxpoints.Add((x,y));
                     }
                 }
-            }
-            PixelLoopEnd:
+            })) ;
+        PixelLoopEnd:
             mat3.Dispose();
             result.Dispose();
 
             graphics.Dispose();
 
-            return (matchCount, ImageSourceForBitmap(img));
+            return (matchCount, ImageSourceFromBitmap(img));
         }
     }
 }

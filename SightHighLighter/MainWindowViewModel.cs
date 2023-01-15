@@ -1,22 +1,21 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace SightHighlighter
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        // Data binding
-        // ref: https://medium.com/oldbeedev/wpf-data-binding-concept-mode-updatesourcetrigger-648735b2444
-        private double _similarityThreshold = 100;
-        public double similarityThreshold
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
         {
-            get { return _similarityThreshold; }
-            set { _similarityThreshold = value; OnPropertyChanged("similarityThreshold"); }
+            if (!Equals(field, newValue))
+            {
+                field = newValue;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+
+            return false;
         }
-
-        public ButtonCommand ApplySimilarityCommand { get; set; }
-
-
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged(string propertyName)
@@ -24,27 +23,49 @@ namespace SightHighlighter
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // Data binding
+        // ref: https://medium.com/oldbeedev/wpf-data-binding-concept-mode-updatesourcetrigger-648735b2444
+        //private double _similarityThresholdPercent = 99;
+        //private double _similarityThreshold = 99;
+        //public double SimilarityThresholdPercent
+        //{
+        //    get { return _similarityThresholdPercent; }
+        //    set { 
+        //        _similarityThresholdPercent = value;
+        //        _similarityThreshold = _similarityThreshold / 100.0;
+        //        OnPropertyChanged("SimilarityThreshold");
+        //    }
+        //}
+
+        public ButtonCommand ApplySimilarityCommand { get; set; }
+        public MainWindowViewModel()
+        {
+            ApplySimilarityCommand = new ButtonCommand(ApplySimilarity,CanApplySimilarity);
+            // ApplySimilarityCommand = new DelegateCommand(ApplySimilarity); // requires prism
+        }
+
         // role of delegateCommand: separate callback command and real action in MVVM model
         // in this time, command:ApplySimilarityCommand, Action:ApplySimilarity
         // ref: https://chashtag.tistory.com/57
         // public DelegateCommand ApplySimilarityCommand { get; private set; }
 
-        public MainWindowViewModel()
-        {
-            ApplySimilarityCommand = new ButtonCommand(ApplySimilarity,CanApplySimilarity);
-            // ApplySimilarityCommand = new DelegateCommand(ApplySimilarity);
-        }
-
         private void ApplySimilarity(object? obj)
         {
             //Debug.WriteLine(_similarityThreshold.ToString());
-            ImageProcessor.threshold = _similarityThreshold/100.0; // use private variable
+            // ImageProcessor.threshold = _similarityThreshold/100.0; // use private variable
         }
 
         private bool CanApplySimilarity(object? obj)
         {
             return true;
         }
+
+
+
+        private double similarityThresholdPercent;
+        public double SimilarityThresholdPercent { get => similarityThresholdPercent; set => SetProperty(ref similarityThresholdPercent, value); }
+
+        // Images
 
     }
 }

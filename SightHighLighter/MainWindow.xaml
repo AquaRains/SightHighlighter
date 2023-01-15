@@ -28,7 +28,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <Button x:Name="ApplySimilarityButton" Content="Apply similarity" Command="{Binding ApplySimilarityCommand}"></Button>
                                 <local:CustomTextBox x:Name="similarityThresholdTextBox" Width="40" Margin="3"
-                                                     Text="{Binding similarityThreshold, UpdateSourceTrigger=Explicit, StringFormat={}{0:###.000}}">
+                                                     Text="{Binding SimilarityThresholdPercent, UpdateSourceTrigger=Explicit, StringFormat={}{0:###.000}}">
                                          <!--Text="{Binding similarityThreshold, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:###.###}}">-->
                                     <!--format ref: https://stackoverflow.com/questions/18361689/how-to-format-number-of-decimal-places-in-wpf-using-style-template-->
                                     <!--<TextBox.InputBindings>
@@ -38,7 +38,7 @@
                                 <Label Content="%"></Label>
                                 
                             </StackPanel>
-                            <Slider VerticalContentAlignment="Bottom" Maximum="100" Value="{Binding similarityThreshold, Converter={StaticResource nonlinearConverter}}" 
+                            <Slider VerticalContentAlignment="Bottom" Maximum="100" Value="{Binding SimilarityThresholdPercent, Converter={StaticResource nonlinearConverter}}" 
                                         Minimum="1" SmallChange="0.01"/>
                             <StackPanel Orientation="Horizontal">
                                 <Button x:Name="hookStateToggleButton" Content="Hook on/off" ButtonBase.Click="hookStateToggleButton_Click"/>
@@ -60,7 +60,37 @@
                     <Image x:Name="capturedImage1" Grid.Row="1" Grid.ColumnSpan="2"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Advanced"/>
+            <TabItem Header="ColorMode">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <GroupBox Header="GrayScale">
+                        <Image x:Name="templateImageGray"/>
+                    </GroupBox>
+                    <GroupBox Header="BGR" Grid.Column="1">
+                        <Image x:Name="templateImageBGR"/>
+                    </GroupBox>
+                    <GroupBox Header="Blue" Grid.Column="0" Grid.Row="1">
+                        <Image x:Name="templateImageBlue"/>
+                    </GroupBox>
+                    <GroupBox Header="Green" Grid.Column="1" Grid.Row="2">
+                        <Image x:Name="templateImageGreen"/>
+                    </GroupBox>
+                    <GroupBox Header="Red" Grid.Column="2" Grid.Row="2">
+                        <Image x:Name="templateImageRed"/>
+                    </GroupBox>
+                </Grid>
+
+
+            </TabItem>
         </TabControl>
 
     </Grid>
