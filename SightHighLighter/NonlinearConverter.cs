@@ -1,17 +1,10 @@
-﻿using Prism.Commands;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Data;
 
 namespace SightHighlighter
 {
-    
+
     public class NonlinearConverter: IValueConverter
     {
         // Convert: source(data) to target(UI), ConvertBack: reverse way

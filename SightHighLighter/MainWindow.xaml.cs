@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -27,8 +25,6 @@ namespace SightHighlighter
             dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
             dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, 10); // d, h, m, s, ms
             dispatcherTimer.IsEnabled= false;
-            
-
             hookStateLabel.Content = "off";
         }
 
@@ -65,7 +61,9 @@ namespace SightHighlighter
             {
                 string fileName = dialog.FileName;
                 templateImage1.Source = new BitmapImage(new Uri(fileName));
-                ImageProcessor.imgtemp = new OpenCvSharp.Mat(fileName);
+                ImageProcessor.SetImageTemplate(fileName);
+
+                //templateImageBGR.Source = ImageProcessor.bgrImg;
             }
         }
 
@@ -111,5 +109,8 @@ namespace SightHighlighter
         // Todo2: threshold 값 변경하는법 - done 2023.01.03
         // Todo3: 파일 읽을때까지 비활성화 - done 2023.01.03
         // Todo4: 파일 언로드하면서 hook 비활성화하는 기능
+        // Todo5: 흑백으로 프로세싱
+        // Todo6: parallel for in Imageprocessor + concurrentbag
+        //        ref:https://math-development-geometry.tistory.com/38
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -10,6 +9,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using OpenCvSharp;
+using System.Threading.Tasks;
+using OpenCvSharp.Extensions;
 
 namespace SightHighlighter
 {
@@ -27,11 +28,17 @@ namespace SightHighlighter
         private static readonly System.Drawing.Pen _redPen = new(System.Drawing.Brushes.Red, 5);
 
 
+        public static ImageSource Mat2ImageSource(Mat src, ImageSource dst)
+        {
+            return BitmapSourceFromBitmap(BitmapConverter.ToBitmap(src));
+        }
+
         public static Bitmap CaptureScreen() // ref: https://stackoverflow.com/questions/4978157/how-to-search-for-an-image-on-screen-in-c
         {
             var image = new System.Drawing.Bitmap((int)SystemParameters.PrimaryScreenWidth, (int)SystemParameters.PrimaryScreenHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             using Graphics graphics = Graphics.FromImage(image);
             graphics.CopyFromScreen(PrimaryScreenLeft, PrimaryScreenTop, 0, 0, image.Size, CopyPixelOperation.SourceCopy);
+
             return image;
         }
 
@@ -48,7 +55,7 @@ namespace SightHighlighter
             return image;
         }
 
-        public static System.Windows.Media.Imaging.BitmapSource BitmapSourceFromBitmap(Bitmap bitmap)
+        public static BitmapSource BitmapSourceFromBitmap(Bitmap bitmap)
         {
             // Conversion without interop
             // ref: https://stackoverflow.com/questions/26260654/wpf-converting-bitmap-to-imagesource/26261562#26261562
@@ -88,6 +95,7 @@ namespace SightHighlighter
         public static extern bool DeleteObject([In] IntPtr hObject);
 
         public static ImageSource? ImageSourceForBitmap(Bitmap bmp)
+
         {
             var handle = bmp.GetHbitmap();
             try
@@ -126,7 +134,6 @@ namespace SightHighlighter
             using Mat result = new Mat();
             Cv2.MatchTemplate(mimg, imgtemp_8UC4, result, TemplateMatchModes.CCorrNormed);
 
-
             using var mat3 = new Mat<float>(result);
             var p = (nint)mat3.DataPointer;
             var spant = new Span<float>(mat3.DataPointer, mat3.Width * mat3.Height);
@@ -137,7 +144,8 @@ namespace SightHighlighter
                 {
                     if (matchCount >= MatchCountThreshold)
                     {
-                        goto PixelLoopEnd;
+                        // goto PixelLoopEnd;
+                        continue;
                     }
 
                     float value = Indexer(p, x, y, mat3.Width);
@@ -151,9 +159,10 @@ namespace SightHighlighter
                 }
             }
 
+
             PixelLoopEnd:
 
-            return (matchCount, ImageSourceForBitmap(img));
+            return (matchCount, ImageSourceFromBitmap(img));
         }
 
         private static unsafe float Indexer(nint p, int x, int y, int width)
